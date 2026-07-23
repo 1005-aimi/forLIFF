@@ -2,12 +2,11 @@
 <html>
 <head>
 <meta name="robots" content="noindex,nofollow,noarchive">
-<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
 <link rel="stylesheet" type="text/css" media="all" href="style.css">
 <title>読み込み中…</title>
 <base target="_top">
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-
 <script>
 // ピンチインピンチアウト禁止
 document.documentElement.addEventListener('touchstart', function (e) {
@@ -26,7 +25,11 @@ document.documentElement.addEventListener('touchend', function (e) {
 
 <body>
 <div id="loader">
-<p><br><br>　読み込み中…</p>
+  <svg width="100%" height="120">
+    <text x="50%" y="100" font-size="32px" text-anchor="middle" fill="#fff">
+      読込中…
+    </text>
+  </svg>
 </div>
 
 <div class="iframe-wrap">
@@ -43,6 +46,7 @@ let flag = params.get('flag') ? Number(params.get('flag')) : 0;
 
 const ua = navigator.userAgent;
 let iOSflag = params.get('iOSflag') ? 1 : 0;
+let ext = params.get('ext');
 
 init();
 
@@ -50,18 +54,24 @@ function init() {
   liff.init({ liffId: "2006671271-8BZzpO29" }).then(() => {
 
     if (liff.isInClient()) {
+        //外部ブラウザで開くオプション
+      if (ext=="true") {
+        const location = document.location + "&ext=true";
+        liff.openWindow({ url: location, external: true });
+        liff.closeWindow();
+        document.title = "このウィンドウは閉じてください。";
+        return;
+      }
       liff.ready.then(() => {
-
         if (ua.indexOf('iPad') > 0 && !iOSflag) {
           const location = document.location + "&iOSflag=1";
           liff.openWindow({ url: location, external: false });
+          // liff.closeWindow();これを実行するとLIFFでなくLINEが閉じてしまうため、含めない。
           document.title = "このウィンドウは閉じてください。";
           return;
         }
-
         if (liff.isLoggedIn()) loader.style.display = "block";
         else liff.login();
-
         userId = liff.getDecodedIDToken().sub;
         jump();
       });
@@ -112,30 +122,22 @@ function jump() {
     /* ------------------------------
        GAS 側からの LOADED 通知を受け取る
        ------------------------------ */
-    /*
     window.addEventListener("message", (e) => {
-      if (e.data === "LOADED") {
+      if (e.data.type === "TITLE") {
         loaded = true;
         loader.style.display = "none";
+        document.title = e.data.value;
       }
     });
-    */
-window.addEventListener("message", (e) => {
-  if (e.data.type === "TITLE") {
-    loaded = true;
-    loader.style.display = "none";
-    document.title = e.data.value;
-  }
-});
 
     /* ------------------------------
-       タイムアウト（8秒）
+       タイムアウト（10秒）
        ------------------------------ */
     setTimeout(() => {
       if (!loaded) {
         window.top.location.href = src;
       }
-    }, 8000);
+    }, 10000);
   }
 
   /* ------------------------------
