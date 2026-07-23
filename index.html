@@ -8,6 +8,15 @@
 <base target="_top">
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script>
+// 3時間経過で閉じる。できなければ非表示。
+const limitMs = 10*1000;
+setTimeout(() => {
+  document.body.innerHTML = "";
+  alert("24時間が経過したため、画面を消去します。この地図を引き続き使用する場合は、LINEのトーク画面から開きなおしてください。"); // 全消し
+  window.close();   // 自動クローズ
+  liff.closeWindow();
+}, limitMs);
+
 // ピンチインピンチアウト禁止
 document.documentElement.addEventListener('touchstart', function (e) {
   if (e.touches.length >= 2) e.preventDefault();
