@@ -56,7 +56,7 @@ function init() {
     if (liff.isInClient()) {
         //外部ブラウザで開くオプション
       if (ext=="true") {
-        const location = document.location + "&ext=true";
+        const location = document.location;
         liff.openWindow({ url: location, external: true });
         liff.closeWindow();
         document.title = "このウィンドウは閉じてください。";
